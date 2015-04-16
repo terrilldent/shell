@@ -1,2 +1,2 @@
 # shell
-Web App base shell that downloads and caches the entire application. Powerful way to deploy apps without resubmitting to the app store. 
+A shell mobile application that caches the front end code and periodically checks for updates

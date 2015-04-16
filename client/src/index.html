@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport" content ="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style type="text/css">
+    
+    /* ----------- Reset Styles --------- */
+    body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,form,label,input,textarea,p,td{margin:0;padding:0}
+    table{border-collapse:collapse;border-spacing:0}
+    a,a:active,a:focus,input,textarea{outline:none; text-decoration: none}
+    td,th{vertical-align:top;text-align:left}
+    img,iframe{ border:none}
+    ol,ul{list-style:none}
+    h1,h2,h3{font-size:100%;font-weight:normal}  
+    html,a{-webkit-tap-highlight-color:rgba(0, 0, 0, 0)}
+
+    /* ----------- BASE & LOADER --------- */
+    html,
+    body,
+    #shell-app{
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
+    body{font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;}
+    #base-loader{ 
+      text-align: center;
+      border-radius: 1000px;
+      background: #F00;
+      display: block;
+      height: 1000px;
+      width: 1000px;
+      margin: -500px 0 0 -500px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      line-height: 1000px;
+      z-index: 500000;
+      overflow: hidden;
+      color: #FFF;
+      transition:  all .2s linear;
+        display: none;
+    }
+    #base-loader.hide{
+      transform: scale(0);
+    } 
+
+  </style>
+</head>
+<body>
+
+<div id="base-loader">Loading...</div>
+
+<script src='shell.js'></script>
+</body>
+</html>
