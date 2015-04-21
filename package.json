@@ -1,0 +1,17 @@
+{
+  "name": "shell",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Terrill Dent",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.11.2",
+    "grunt-nodestatic": "^0.1.2"
+  },
+  "dependencies": {}
+}

@@ -1,15 +1,15 @@
 /*! shell v1.0.0 ~ (c) 2015 Terrill Dent ~ http://www.terrill.ca/shell/license */
-!(function(){
+(function(){
+    'use strict';
 
         // Variables
-    var SERVER_ADDRESS = 'http://www.example.com/app-dist/',
+    var SERVER_ADDRESS = 'http://localhost:8889/app',
 
         // Functions
         requestVersion,
-        injectStyle,
-        injectScript,
-        checkStyle,
-        checkScript,
+        checkCache,
+        injectContent,
+        showNoDataFailure,
         getById,
         restart,
         request,
@@ -25,34 +25,18 @@
         htmlTag,
         scriptTag,
         loader,
-        params,
-        initialized = true;
 
-
-    (function(){
-        var ua   = navigator.userAgent.toLowerCase(),
-            ipad     = ua.indexOf( 'ipad' ) > -1, 
-            ios      = ipad || ua.indexOf( 'ipod' ) > -1 || ua.indexOf( 'iphone' ) > -1,
-            bb10     = !ios && ua.indexOf( 'bb10' ) > -1 ,
-            playbook = !ios && ua.indexOf( 'playbook' ) > -1,
-            bb       = bb10 || playbook,
-            android,
-            tablet,
-            highres,
-            vendor;
-            
-        android  = !ios && ( ua.indexOf( 'android' ) > -1 || 
-                             ua.indexOf( 'silk' ) > -1 || 
-                             ua.indexOf( 'htc_' ) > -1 ),
-        ipad     = ipad || window.innerWidth >= 768,
-        tablet   = playbook || ipad || window.innerWidth >= 768 ||
-                    ( android && ua.indexOf( 'mobile' ) == -1 ),
-        highres = window.devicePixelRatio >= 2,
-
-        vendor = (ios? 'ios' : '') || (bb? 'bb' : '') || (android? 'android' : '') || 'ios';
-
-        params = '?vendor=' + vendor + (highres? '&highres=t' : '') + (tablet? '&tablet=t' : '');
-    }());
+        // User Agent Sniffing
+        ua       = navigator.userAgent.toLowerCase(),
+        ipad     = ~ua.indexOf('ipad'),
+        ios      = ipad || ~ua.indexOf('iphone') || ~ua.indexOf('ipod') ,
+        android  = ~ua.indexOf('android') || ~ua.indexOf('silk') || ~ua.indexOf('htc_'),
+        playbook = ua.indexOf( 'playbook' ),
+        bb       = playbook || ~ua.indexOf('bb10' ),
+        tablet   = playbook || ipad || window.innerWidth >= 768 || ( android && ua.indexOf('mobile') === -1 ),
+        highres  = window.devicePixelRatio >= 2,
+        vendor   = (ios? 'ios' : '') || (bb? 'bb' : '') || (android? 'android' : '') || 'ios',
+        params   = '?vendor=' + vendor + (highres? '&highres=t' : '') + (tablet? '&tablet=t' : '');
 
 
     getById = function(id)
@@ -60,31 +44,31 @@
         return document.getElementById(id);
     };
 
-    request = function( url, successCallback, failureCallback, overrideMimeType, ignoreStatusCode ) 
+    request = function( url, successCallback, failureCallback, overrideMimeType, ignoreStatusCode )
     {
         var request = new XMLHttpRequest();
-        
-        request.open( "GET", url, true );
+      
+        request.open( 'GET', url, true );
         if( overrideMimeType ) {
             request.overrideMimeType('text/plain;charset=x-user-defined');
         }
 
         request.onreadystatechange = function()
         {
-            if( this.readyState === 4 ) {  
+            if( this.readyState === 4 ) {
                 if( this.status === 200 || ignoreStatusCode ) {
                     if( successCallback ) {
                         successCallback( request.status, request.responseText, request.getResponseHeader('Content-Type') );
                         successCallback = null; // prevent double calling for local ajax calls
                     }
                 } else if( failureCallback ) {
-                    failureCallback( request.status, request.responseText, request.getResponseHeader('Content-Type') );                
+                    failureCallback( request.status, request.responseText, request.getResponseHeader('Content-Type') );
                 }
             }
 
         };
         request.send( true );
-    }
+    };
 
     remove = function( element )
     {
@@ -96,7 +80,7 @@
     addClass = function( element, className )
     {
         if(!hasClass(element,className)){
-            element.className += " " + className;
+            element.className += ' ' + className;
         }
     };
 
@@ -110,27 +94,27 @@
 
     hasClass = function( element, className )
     {
-        return element.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));                    
+        return element.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
     };
 
-    // Shown if there is no cached content and initialization fails
-    showNoDataFailure = function(){
-        // TODO: 
+    // TODO: Shown if there is no cached content and initialization fails
+    showNoDataFailure = function()
+    {
         console.log( 'no data to show, and init failed' );
     };
 
     requestVersion = function(){
-        var curVersion = localStorage['shell-version'];
+        var curVersion = localStorage['shell-version'],
             firstLoad = !!curVersion;
 
-        request( SERVER_ADDRESS + params + ( curVersion ? '&version=' + curVersion : '' ), 
-            function( statusCode, data, contentType ){
+        request( SERVER_ADDRESS + params + ( curVersion ? '&version=' + curVersion : '' ),
+            function( statusCode, data ){
                 if( !data ){ return; }
 
                 try{
                     data = JSON.parse(data);
                 }catch( e ){
-                    if( !initialized ){
+                    if( !curVersion ){
                         showNoDataFailure();
                     }
                     return;
@@ -151,7 +135,7 @@
                 localStorage['shell-version'] = data.version;
                 localStorage['shell-html']    = data.html;
 
-                if( initialized ) {
+                if(scriptTag) {
                     restart(firstLoad);
                 } else {
                     checkCache();
@@ -160,7 +144,7 @@
             function(){
                 // error case
                 console.log( 'error requesting update from server' );
-                if( !initialized ){
+                if( !scriptTag ){
                     showNoDataFailure();
                 }
             }
@@ -231,7 +215,6 @@
         if( cachedScript && cachedStyle ){
             console.log( 'injecting cached content' );
             injectContent( cachedStyle, cachedHTML, cachedScript, cachedIMG );
-            initialized = true;
         } else {
             console.log( 'cache miss' );
         }
