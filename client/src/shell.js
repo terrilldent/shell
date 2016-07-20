@@ -3,7 +3,7 @@
     'use strict';
 
         // Variables
-    var SERVER_ADDRESS = 'http://localhost:8889/app',
+    var SERVER_ADDRESS = 'http://localhost:8892/app',
 
         // Functions
         requestVersion,
@@ -103,7 +103,8 @@
         console.log( 'no data to show, and init failed' );
     };
 
-    requestVersion = function(){
+    requestVersion = function()
+    {
         var curVersion = localStorage['shell-version'],
             firstLoad = !!curVersion;
 
@@ -151,7 +152,8 @@
         );
     };
 
-    injectContent = function( cachedStyle, cachedHTML, cachedScript, cachedIMG ) {
+    injectContent = function( cachedStyle, cachedHTML, cachedScript, cachedIMG )
+    {
         var fragment;
 
         if( scriptTag ){
@@ -202,11 +204,13 @@
         }, 300);
     };
 
-    restart = function(){
+    restart = function()
+    {
         checkCache();
     };
 
-    checkCache = function(){
+    checkCache = function()
+    {
         var cachedScript = localStorage['shell-script'],
             cachedStyle  = localStorage['shell-style'],
             cachedHTML   = localStorage['shell-html'],
@@ -220,7 +224,8 @@
         }
     };
 
-    init = function(){
+    init = function()
+    {
         console.log( 'initializing' );
         loader = getById('base-loader');
         checkCache();

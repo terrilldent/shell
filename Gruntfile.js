@@ -37,7 +37,7 @@ module.exports = function( grunt )
     nodestatic: {
       server: {
         options: {
-          port: 8887,
+          port: 8891,
           base: 'client/src',
           keepalive: true
         }
