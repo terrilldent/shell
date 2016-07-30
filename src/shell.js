@@ -8,55 +8,64 @@
         return;
     }
 
+        // Configuration
+    var DEBUG_OUTPUT = false,
+        SIMULATE_OLD_CACHE = false,
+        SIMULATE_EMPTY_CACHE = false,
+        
         // Functions
-    var requestVersion,
-        checkCache,
-        injectContent,
-        showNoDataFailure,
-        getById,
-        restart,
+        requestVersion,
         request,
         remove,
-        addClass,
-        removeClass,
-        hasClass,
+        clearStorage,
+        checkCache,
+        showNoDataFailure,
+        injectContent,
         init,
+        log,
 
         // Variables
+        platform,
         styleTag,
-        imgStyleTag,
         scriptTag,
-        loader,
+        params,
+        mobile,
+        initialized;
 
-        // User Agent Sniffing
-        ua       = navigator.userAgent.toLowerCase(),
-        ipad     = ~ua.indexOf('ipad'),
-        ios      = ipad || ~ua.indexOf('iphone') || ~ua.indexOf('ipod') ,
-        android  = ~ua.indexOf('android') || ~ua.indexOf('silk') || ~ua.indexOf('htc_'),
-        playbook = ua.indexOf( 'playbook' ),
-        bb       = playbook || ~ua.indexOf('bb10' ),
-        tablet   = playbook || ipad || window.innerWidth >= 768 || ( android && ua.indexOf('mobile') === -1 ),
-        highres  = window.devicePixelRatio >= 2,
-        vendor   = (ios? 'ios' : '') || (bb? 'bb' : '') || (android? 'android' : '') || 'ios',
-        params   = '?vendor=' + vendor + (highres? '&highres=t' : '') + (tablet? '&tablet=t' : '');
-
-
-    getById = function(id)
-    {
-        return document.getElementById(id);
+    log = function(msg){
+        if(DEBUG_OUTPUT){
+            console.log(msg);
+        }
     };
 
-    request = function( url, successCallback, failureCallback, overrideMimeType, ignoreStatusCode )
-    {
+    (function(){
+        var ua   = navigator.userAgent.toLowerCase(),
+            ipad     = ua.indexOf( 'ipad' ) > -1,
+            ios      = ipad || ua.indexOf( 'ipod' ) > -1 || ua.indexOf( 'iphone' ) > -1,
+            bb10     = !ios && ua.indexOf( 'bb10' ) > -1 ,
+            playbook = !ios && ua.indexOf( 'playbook' ) > -1,
+            bb       = bb10 || playbook,
+            android  = !ios && (ua.indexOf( 'android' ) > -1 || ua.indexOf( 'silk' ) > -1 || ua.indexOf( 'htc_' ) > -1),
+            tablet   = playbook || ipad || window.innerWidth >= 768 || ( android && ua.indexOf( 'mobile' ) === -1 ),
+            highres  = window.devicePixelRatio >= 2;
+
+        platform = (ios? 'ios' : '') || (bb? 'bb' : '') || (android? 'android' : '') || 'ios';
+
+        params = '?platform=' + platform + (highres? '&highres=t' : '') + (tablet? '&tablet=t' : '');
+        mobile = ios || android || bb;
+
+        log( '- shell: config: ' + params );
+    }());
+
+    request = function( url, successCallback, failureCallback, overrideMimeType, ignoreStatusCode ){
         var request = new XMLHttpRequest();
-      
+
         request.open( 'GET', url, true );
         if( overrideMimeType ) {
             request.overrideMimeType('text/plain;charset=x-user-defined');
         }
 
-        request.onreadystatechange = function()
-        {
+        request.onreadystatechange = function() {
             if( this.readyState === 4 ) {
                 if( this.status === 200 || ignoreStatusCode ) {
                     if( successCallback ) {
@@ -67,157 +76,136 @@
                     failureCallback( request.status, request.responseText, request.getResponseHeader('Content-Type') );
                 }
             }
-
         };
         request.send( true );
     };
 
-    remove = function( element )
-    {
-        if( element && element.parentNode ) {
-            element.parentNode.removeChild( element );
-        }
-    };
-
-    addClass = function( element, className )
-    {
-        if(!hasClass(element,className)){
-            element.className += ' ' + className;
-        }
-    };
-
-    removeClass = function( element, className )
-    {
-        if(hasClass(element,className)){
-            var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
-            element.className = element.className.replace( reg, ' ' );
-        }
-    };
-
-    hasClass = function( element, className )
-    {
-        return element.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
-    };
-
-    // TODO: Shown if there is no cached content and initialization fails
     showNoDataFailure = function()
     {
         console.log( 'no data to show, and init failed' );
+        // TODO: Implement your error screen
     };
 
-    requestVersion = function()
-    {
-        var curVersion = localStorage['shell-version'],
-            firstLoad = !!curVersion;
+    clearStorage = function() {
+        // Clean up CSS
+        var i = 0, key;
+        for( i = localStorage.length - 1; i >= 0 ; i-- ){
+            key = localStorage.key( i );
+            if(key !== 'uid')  {
+                localStorage.removeItem( key );
+            }
+        }
+    };
+
+    requestVersion = function(){
+        var curVersion = localStorage['shell-version'];
 
         request( SERVER_ADDRESS + params + ( curVersion ? '&version=' + curVersion : '' ),
-            function( statusCode, data ){
+            function(statusCode, data) {
                 if( !data ){ return; }
 
                 try{
                     data = JSON.parse(data);
                 }catch( e ){
-                    if( !curVersion ){
-                        showNoDataFailure();
-                    }
+                    console.log(e);
+                    showNoDataFailure();
                     return;
                 }
                 if( !data.version ){
-                    console.log( 'Response has no version' );
+                    log( '- shell: response has no version' );
                     return;
                 }
                 if( curVersion && data.version <= curVersion ){
-                    console.log( 'we have this version' );
-                    return;
+                    log( '- shell: we have this version' );
+                    if (!SIMULATE_OLD_CACHE) {
+                        return;
+                    }
+                    log( '- shell: (SIMULATE_OLD_CACHE) continuing anyway' );
                 }
 
-                console.log( 'saving response' );
+                log( '- shell: clearing storage' );
+                clearStorage();
+
+                log( '- shell: caching response' );
                 localStorage['shell-style']   = data.style;
                 localStorage['shell-script']  = data.script;
                 localStorage['shell-img']     = data.img;
                 localStorage['shell-version'] = data.version;
-
-                if(scriptTag) {
-                    restart(firstLoad);
-                } else {
-                    checkCache();
-                }
+                checkCache();
             },
-            function(){
+            function(statusCode){
                 // error case
-                console.log( 'error requesting update from server' );
-                if( !scriptTag ){
-                    showNoDataFailure();
+                if( statusCode === 304 ){
+                    log( '- shell: we have the correct version' );
+                    return;
                 }
+                log( '- shell: error requesting update from server: ' + statusCode );
+                showNoDataFailure();
             }
         );
     };
 
-    injectContent = function( cachedStyle, cachedScript, cachedIMG )
-    {
-        if( scriptTag ){
-            remove( scriptTag );
+    remove = function( element ){
+        if( element && element.parentNode ) {
+            element.parentNode.removeChild( element );
         }
-        if( imgStyleTag ){
-            remove( imgStyleTag );
-        }
-        if( styleTag ){
-            remove( styleTag );
-        }
+    };
+
+    injectContent = function( cachedStyle, cachedScript, cachedIMG ){
+        remove( scriptTag );
+        remove( styleTag );
 
         styleTag = document.createElement( 'style' );
         styleTag.type= 'text/css';
-        styleTag.innerHTML = cachedStyle;
-
-        imgStyleTag = document.createElement( 'style' );
-        imgStyleTag.type= 'text/css';
-        imgStyleTag.innerHTML = cachedIMG;
-
-        document.getElementsByTagName('head')[0].appendChild(styleTag);
-        document.getElementsByTagName('head')[0].appendChild(imgStyleTag);
+        styleTag.appendChild(document.createTextNode(cachedStyle + ' ' + cachedIMG));
 
         scriptTag = document.createElement( 'script' );
         scriptTag.type= 'text/javascript';
         scriptTag.textContent = cachedScript;
 
+        document.getElementsByTagName('head')[0].appendChild(styleTag);
         try {
-            document.body.appendChild( scriptTag );
+            document.body.appendChild(scriptTag);
         } catch( e ){
-            console.log( e );
+            log( '- shell: error inserting app fragment: ' + e );
         }
 
-        // Hide the loader
-        addClass( loader, 'hide' );
-        setTimeout( function(){
-            addClass( loader, 'hidden' );
-        }, 300);
+        if (platform === 'bb') {
+            document.addEventListener('deviceready', function(){
+                setTimeout(function(){
+                    if (navigator && navigator.splashscreen){
+                        navigator.splashscreen.hide();
+                    }
+                },150);
+            }, false);
+        }
     };
 
-    restart = function()
-    {
-        checkCache();
-    };
-
-    checkCache = function()
-    {
+    checkCache = function(){
         var cachedScript = localStorage['shell-script'],
             cachedStyle  = localStorage['shell-style'],
             cachedIMG    = localStorage['shell-img'];
 
-        if( cachedScript && cachedStyle ){
-            console.log( 'injecting cached content' );
+        if( cachedScript && cachedStyle && cachedIMG ){
+            log( '- shell: injecting cached content' );
             injectContent( cachedStyle, cachedScript, cachedIMG );
-        } else {
-            console.log( 'cache miss' );
+            initialized = true;
+            return true;
         }
+        log( '- shell: cache miss' );
+        return false;
     };
 
-    init = function()
-    {
-        console.log( 'initializing' );
-        loader = getById('base-loader');
-        checkCache();
-        requestVersion();
+    init = function(){
+        log( '- shell: initializing' );
+        if( SIMULATE_EMPTY_CACHE || !checkCache() ){
+            requestVersion();
+        } else {
+            // Request the new version later
+            setTimeout( function(){
+                requestVersion();
+            }, SIMULATE_OLD_CACHE ? 0 : 500);
+        }
     };
 
     init();
