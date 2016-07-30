@@ -1,6 +1,6 @@
 {
   "name": "shell",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "Gruntfile.js",
   "scripts": {
@@ -10,8 +10,12 @@
   "license": "MIT",
   "devDependencies": {
     "grunt": "~0.4.1",
+    "grunt-concurrent": "^2.3.0",
+    "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-jshint": "~0.11.2",
-    "grunt-nodestatic": "^0.1.2"
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-execute": "^0.2.2"
   },
   "dependencies": {}
 }

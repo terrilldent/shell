@@ -1,9 +1,7 @@
 module.exports = function( grunt )
 {
   var latest = '<%= pkg.name %>',
-      name   = '<%= pkg.name %>-v<%= pkg.version%>',
-      sourceClient = 'client/',
-      sourceServer = 'server/';
+      name   = '<%= pkg.name %>-v<%= pkg.version%>';
        
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -30,26 +28,60 @@ module.exports = function( grunt )
         }
       },
       target: {
-        src : [ sourceClient + '**/*.js' ]
+        src : [ 'src/**/*.js' ]
       }
     },
 
-    nodestatic: {
-      server: {
-        options: {
-          port: 8891,
-          base: 'client/src',
-          keepalive: true
+    execute: {
+      sample: {
+        src: 'sample/server.js'
+      }
+    },
+
+    uglify: {
+      shell: {
+        files: {
+          'dist/shell.min.js': ['src/shell.js']
         }
       }
+    },
+
+    copy: {
+      sample: {
+        expand: true,
+        cwd: 'src',
+        src: '**',
+        dest: 'sample/static/',
+      },
+    },
+
+    watch: {
+      shell: {
+        files: 'src/**/*.*',
+        tasks: ['build'],
+        options: {
+          livereload: true,
+        },
+      }
+    },
+
+    concurrent: {
+      execAndWatch: [ 'execute:sample', 'watch' ],
+      options: {
+        logConcurrentOutput: true
+      }
     }
-
   });
- 
+  
+  grunt.loadNpmTasks('grunt-execute');
+  grunt.loadNpmTasks('grunt-concurrent');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-nodestatic');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
-  grunt.registerTask('default', [ 'jshint', 'nodestatic' ]);
+  grunt.registerTask('build', [ 'jshint', 'uglify', 'copy:sample' ]);
+  grunt.registerTask('default', [ 'build', 'concurrent:execAndWatch' ]);
 };
 
 

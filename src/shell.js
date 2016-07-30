@@ -1,12 +1,15 @@
-/*! shell v1.0.0 ~ (c) 2015 Terrill Dent ~ http://www.terrill.ca/shell/license */
+/*! shell v2.0.0 ~ (c) 2016 Terrill Dent ~ http://www.terrill.ca/shell/license */
+/* globals SERVER_ADDRESS */
 (function(){
     'use strict';
 
-        // Variables
-    var SERVER_ADDRESS = 'http://localhost:8892/app',
+    if (!SERVER_ADDRESS) {
+        console.error('Error: var SERVER_ADDRESS not defined!');
+        return;
+    }
 
         // Functions
-        requestVersion,
+    var requestVersion,
         checkCache,
         injectContent,
         showNoDataFailure,
@@ -22,7 +25,6 @@
         // Variables
         styleTag,
         imgStyleTag,
-        htmlTag,
         scriptTag,
         loader,
 
@@ -134,7 +136,6 @@
                 localStorage['shell-script']  = data.script;
                 localStorage['shell-img']     = data.img;
                 localStorage['shell-version'] = data.version;
-                localStorage['shell-html']    = data.html;
 
                 if(scriptTag) {
                     restart(firstLoad);
@@ -152,15 +153,10 @@
         );
     };
 
-    injectContent = function( cachedStyle, cachedHTML, cachedScript, cachedIMG )
+    injectContent = function( cachedStyle, cachedScript, cachedIMG )
     {
-        var fragment;
-
         if( scriptTag ){
             remove( scriptTag );
-        }
-        if( htmlTag ){
-            remove( htmlTag );
         }
         if( imgStyleTag ){
             remove( imgStyleTag );
@@ -180,19 +176,12 @@
         document.getElementsByTagName('head')[0].appendChild(styleTag);
         document.getElementsByTagName('head')[0].appendChild(imgStyleTag);
 
-        fragment = document.createDocumentFragment();
-        htmlTag = document.createElement( 'div' );
-        htmlTag.id = 'shell-app';
-        htmlTag.innerHTML = cachedHTML;
-        fragment.appendChild( htmlTag );
-
         scriptTag = document.createElement( 'script' );
         scriptTag.type= 'text/javascript';
         scriptTag.textContent = cachedScript;
-        fragment.appendChild( scriptTag );
 
         try {
-            document.body.appendChild( fragment );
+            document.body.appendChild( scriptTag );
         } catch( e ){
             console.log( e );
         }
@@ -213,12 +202,11 @@
     {
         var cachedScript = localStorage['shell-script'],
             cachedStyle  = localStorage['shell-style'],
-            cachedHTML   = localStorage['shell-html'],
             cachedIMG    = localStorage['shell-img'];
 
         if( cachedScript && cachedStyle ){
             console.log( 'injecting cached content' );
-            injectContent( cachedStyle, cachedHTML, cachedScript, cachedIMG );
+            injectContent( cachedStyle, cachedScript, cachedIMG );
         } else {
             console.log( 'cache miss' );
         }

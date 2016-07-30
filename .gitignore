@@ -1,1 +1,4 @@
 node_modules
+dist
+sample/static/shell.js
+.DS_Store
