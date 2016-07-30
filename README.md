@@ -1,6 +1,8 @@
 # shell
 
-Shell is like a Service Worker polyfill for resource loading. 
+Shell is like a Service Worker polyfill for cached resource loading.  
+
+Note: This is a work in progress, but a variant of it is powering an app in production.
 
 It allows you to instantly update Cordova and Phonegap based mobile applications on the App Store and Google Play without resubmitting your app for approval. Typically the App Store does not allow you to download code changes on the fly, unless your code is running inside a WebView. 
 
