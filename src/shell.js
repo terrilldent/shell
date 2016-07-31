@@ -1,4 +1,4 @@
-/*! shell v2.0.0 ~ (c) 2016 Terrill Dent ~ http://www.terrill.ca/shell/license */
+/*! shell v2.0.0 ~ (c) 2016 Terrill Dent ~ http://www.terrill.ca/projects/shelljs/license */
 /* globals SERVER_ADDRESS */
 (function(){
   'use strict';
@@ -9,7 +9,7 @@
   }
 
     // Configuration
-  var DEBUG_OUTPUT = false,
+  var DEBUG_OUTPUT = true,
       SIMULATE_OLD_CACHE = false,
       SIMULATE_EMPTY_CACHE = false,
       
@@ -157,7 +157,7 @@
 
     styleTag = document.createElement( 'style' );
     styleTag.type= 'text/css';
-    styleTag.appendChild(document.createTextNode(cachedStyle + ' ' + cachedIMG));
+    styleTag.appendChild(document.createTextNode(cachedStyle + ' ' + (cachedIMG || '')));
 
     scriptTag = document.createElement( 'script' );
     scriptTag.type= 'text/javascript';
@@ -168,16 +168,8 @@
       document.body.appendChild(scriptTag);
     } catch( e ){
       log( '- shell: error inserting app fragment: ' + e );
-    }
-
-    if (platform === 'bb') {
-      document.addEventListener('deviceready', function(){
-        setTimeout(function(){
-          if (navigator && navigator.splashscreen){
-            navigator.splashscreen.hide();
-          }
-        },150);
-      }, false);
+      log( '- This typically happens when there is a bug in the app initialization code.' );
+      log( '- This is a good thing to report to the server!' );
     }
   };
 
@@ -186,7 +178,7 @@
         cachedStyle  = localStorage['shell-style'],
         cachedIMG    = localStorage['shell-img'];
 
-    if( cachedScript && cachedStyle && cachedIMG ){
+    if( cachedScript && cachedStyle ){
       log( '- shell: injecting cached content' );
       injectContent( cachedStyle, cachedScript, cachedIMG );
       initialized = true;

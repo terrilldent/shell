@@ -18,39 +18,28 @@
     /* ----------- BASE & LOADER --------- */
     html,
     body,
-    #shell-app{
+    .shell-loader {
       height: 100%;
       width: 100%;
       position: relative;
     }
-    body{font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;}
-    #base-loader{ 
-      text-align: center;
-      border-radius: 1000px;
-      background: #F00;
-      display: block;
-      height: 1000px;
-      width: 1000px;
-      margin: -500px 0 0 -500px;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      line-height: 1000px;
-      z-index: 500000;
-      overflow: hidden;
-      color: #FFF;
-      transition:  all .2s linear;
+    body{
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    .shell-loader { 
+      background: #29C8FF url(/img/shell@2x.png) no-repeat 50% 50%;
+      background-size: 239px 156px;
+      position: fixed;
+      z-index: 100000;
+    }
+    .shell-loader.hide { 
       display: none;
     }
-    #base-loader.hide{
-      transform: scale(0);
-    } 
-
   </style>
 </head>
 <body>
 
-<div id="base-loader">Loading...</div>
+<div class="shell-loader"></div>
 
 <script>
   var SERVER_ADDRESS = '/app';
