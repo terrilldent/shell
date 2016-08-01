@@ -57,7 +57,7 @@ module.exports = function( grunt )
 
     watch: {
       shell: {
-        files: 'src/**/*.*',
+        files: ['src/**', 'sample/app/**/*.*'],
         tasks: ['build'],
         options: {
           livereload: true,

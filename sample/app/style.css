@@ -1,4 +1,22 @@
+.toolbar {
+	border-bottom: 1px solid #EEE;
+	background: #F5F5F5;
+	padding: 10px;
+}
 h1{
-    background: #444;
-    color: #FFF;
+    font-size: 1em;
+    text-align: center;
+    font-weight: 300;
+}
+.app-content {
+	padding: 15px;
+}
+.button {
+	padding: 5px;
+	display: inline-block;
+	color: #29C8FF;
+	background: none;
+	border: 2px solid #29C8FF;
+	border-radius: 4px;
+	margin: 1em 0 0 0;
 }

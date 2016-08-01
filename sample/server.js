@@ -73,12 +73,13 @@ http.createServer(function(request, response) {
             curVer   = fs.readFileSync(path.join(process.cwd(), '/sample/app/VERSION.txt'), "binary"),
             version  = query.version
             highres  = query.highres
+            force    = query.force
             imageMap = {},
             imageCSS = '';
 
         console.log( '- /app requested' );
 
-        if (version === curVer) {
+        if (!force && version === curVer) {
             response.statusCode = 304;
             setHeaders(response, "text/html");
             response.write("");
@@ -101,7 +102,7 @@ http.createServer(function(request, response) {
         setHeaders(response, "application/json");
 
         response.write("{");
-        response.write("\"version\":" + JSON.stringify(version) + ",");
+        response.write("\"version\":" + JSON.stringify(curVer) + ",");
         response.write("\"style\":"   + JSON.stringify(fs.readFileSync(path.join(process.cwd(), '/sample/app/style.css'), "binary")) + ",");
         response.write("\"script\":"  + JSON.stringify(fs.readFileSync(path.join(process.cwd(), '/sample/app/app.js'), "binary")) + "," ); 
         response.write("\"img\":"     + JSON.stringify(imageCSS));

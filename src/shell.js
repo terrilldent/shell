@@ -51,7 +51,10 @@
 
     platform = (ios? 'ios' : '') || (bb? 'bb' : '') || (android? 'android' : '') || 'ios';
 
-    params = '?platform=' + platform + (highres? '&highres=t' : '') + (tablet? '&tablet=t' : '');
+    params = '?platform=' + platform + 
+              (highres? '&highres=t' : '') + 
+              (tablet? '&tablet=t' : '') + 
+              (SIMULATE_OLD_CACHE? '&force=t' : '');
     mobile = ios || android || bb;
 
     log( '- shell: config: ' + params );
@@ -170,6 +173,11 @@
       log( '- shell: error inserting app fragment: ' + e );
       log( '- This typically happens when there is a bug in the app initialization code.' );
       log( '- This is a good thing to report to the server!' );
+    }
+
+    var loader = document.querySelector('.shell-loader');
+    if (loader) {
+      loader.classList.add('hide');
     }
   };
 
