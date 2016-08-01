@@ -70,12 +70,21 @@ http.createServer(function(request, response) {
     var uri = url.parse(request.url).pathname;
     if( uri.indexOf( '/app' ) === 0 ){
         var query    = url.parse(request.url, true).query || {},
+            curVer   = fs.readFileSync(path.join(process.cwd(), '/sample/app/VERSION.txt'), "binary"),
             version  = query.version
             highres  = query.highres
             imageMap = {},
             imageCSS = '';
 
         console.log( '- /app requested' );
+
+        if (version === curVer) {
+            response.statusCode = 304;
+            setHeaders(response, "text/html");
+            response.write("");
+            response.end();
+            return;
+        } 
 
         // Create a map of all the images as Data URIs
         addImageFolder( imageMap, 'img/' );
@@ -92,7 +101,7 @@ http.createServer(function(request, response) {
         setHeaders(response, "application/json");
 
         response.write("{");
-        response.write("\"version\":" + JSON.stringify(fs.readFileSync(path.join(process.cwd(), '/sample/app/VERSION.txt'), "binary")) + ",");
+        response.write("\"version\":" + JSON.stringify(version) + ",");
         response.write("\"style\":"   + JSON.stringify(fs.readFileSync(path.join(process.cwd(), '/sample/app/style.css'), "binary")) + ",");
         response.write("\"script\":"  + JSON.stringify(fs.readFileSync(path.join(process.cwd(), '/sample/app/app.js'), "binary")) + "," ); 
         response.write("\"img\":"     + JSON.stringify(imageCSS));
