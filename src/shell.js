@@ -12,7 +12,7 @@
   var DEBUG_OUTPUT = true,
       SIMULATE_OLD_CACHE = false,
       SIMULATE_EMPTY_CACHE = false,
-      
+
       // Functions
       requestVersion,
       request,
@@ -51,9 +51,9 @@
 
     platform = (ios? 'ios' : '') || (bb? 'bb' : '') || (android? 'android' : '') || 'ios';
 
-    params = '?platform=' + platform + 
-              (highres? '&highres=t' : '') + 
-              (tablet? '&tablet=t' : '') + 
+    params = '?platform=' + platform +
+              (highres? '&highres=t' : '') +
+              (tablet? '&tablet=t' : '') +
               (SIMULATE_OLD_CACHE? '&force=t' : '');
     mobile = ios || android || bb;
 
@@ -118,7 +118,7 @@
           log( '- shell: response has no version' );
           return;
         }
-        if( curVersion && data.version <= curVersion ){
+        if( curVersion && data.version === curVersion ){
           log( '- shell: we have this version' );
           if (!SIMULATE_OLD_CACHE) {
             return;
